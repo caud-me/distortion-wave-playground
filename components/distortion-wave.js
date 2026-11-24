@@ -1,7 +1,8 @@
 /* tunable wave variables (adjust or keyframe any value below) */
 const WAVE_DURATION = 2300;
 const WAVE_ORIGIN_X = 0.5;
-const WAVE_ORIGIN_Y = 0.96;
+const WAVE_ORIGIN_Y = 0.04;
+const WAVE_FOLLOW_CURSOR = false;
 let lastCursorPos = null;
 
 if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
@@ -831,13 +832,17 @@ function trResolveSourceRect(source) {
     return null;
 }
 
-// ive looked up on the internet on this one, measure wave start from cursor position or trigger box inside container
-function trMeasureWaveOrigin(rootEl, source, pointerEvent, explicitOrigin) {
+// ive looked up on the internet on this one, measure wave start from fixed default or cursor when follow mode active
+function trMeasureWaveOrigin(rootEl, source, pointerEvent, explicitOrigin, followCursor) {
     if (explicitOrigin && typeof explicitOrigin.x === "number" && typeof explicitOrigin.y === "number") {
         return {
             x: trClampUnit(explicitOrigin.x),
             y: trClampUnit(explicitOrigin.y)
         };
+    }
+    const useCursor = typeof followCursor === "boolean" ? followCursor : WAVE_FOLLOW_CURSOR;
+    if (!useCursor) {
+        return { x: WAVE_ORIGIN_X, y: WAVE_ORIGIN_Y };
     }
     const rootRect = rootEl.getBoundingClientRect();
     const w = rootRect.width;
@@ -1029,6 +1034,7 @@ function trDistortionWave(options) {
     let particleTime = 0;
     let activeSource = opts.source || null;
     let activeOrigin = opts.origin || null;
+    let activeFollowCursor = typeof opts.followCursor === "boolean" ? opts.followCursor : WAVE_FOLLOW_CURSOR;
     let activeType = opts.type || "center";
     let activePalette = opts.palette || "monochromatic";
     const initialSpeed = typeof opts.speed === "number" ? opts.speed : 1;
@@ -1228,7 +1234,7 @@ function trDistortionWave(options) {
             return;
         }
 
-        const origin = trMeasureWaveOrigin(root, activeSource, pointerEvent, activeOrigin);
+        const origin = trMeasureWaveOrigin(root, activeSource, pointerEvent, activeOrigin, activeFollowCursor);
         const hasCustomDuration = typeof waveStyle.duration === "number";
         const baseDuration = hasCustomDuration ? waveStyle.duration : WAVE_DURATION;
         // <patch-1>

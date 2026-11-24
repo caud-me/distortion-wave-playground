@@ -91,7 +91,7 @@
                 speed: 1.0,
                 originMode: "fixed",
                 originX: 0.5,
-                originY: 0.5,
+                originY: 0.04,
                 bezierX1: 0.76,
                 bezierY1: 0.0,
                 bezierX2: 0.14,
@@ -185,7 +185,8 @@
                 }
                 stageBox.innerHTML = "";
                 revealedState = false;
-                const originVal = state.originMode === "fixed" ? { x: state.originX, y: state.originY } : null;
+                const isPointer = state.originMode === "pointer";
+                const originVal = isPointer ? null : { x: state.originX, y: state.originY };
                 waveCtrl = trDistortionWave({
                     children: buildMockFrom(),
                     revealedContent: buildMockTo(),
@@ -193,6 +194,7 @@
                     palette: activePaletteValue(),
                     speed: state.speed,
                     origin: originVal,
+                    followCursor: isPointer,
                     cornerRadius: 0,
                     waveStyle: {
                         duration: state.duration,
@@ -272,6 +274,7 @@
                     "const WAVE_DURATION = " + state.duration + ";",
                     "const WAVE_ORIGIN_X = " + state.originX + ";",
                     "const WAVE_ORIGIN_Y = " + state.originY + ";",
+                    "const WAVE_FOLLOW_CURSOR = " + (state.originMode === "pointer") + ";",
                     "const WAVE_BEZIER_X1 = " + state.bezierX1 + ";",
                     "const WAVE_BEZIER_Y1 = " + state.bezierY1 + ";",
                     "const WAVE_BEZIER_X2 = " + state.bezierX2 + ";",
@@ -361,7 +364,8 @@
             }
 
             function triggerFullscreenDemo() {
-                const originVal = state.originMode === "fixed" ? { x: state.originX, y: state.originY } : null;
+                const isPointer = state.originMode === "pointer";
+                const originVal = isPointer ? null : { x: state.originX, y: state.originY };
                 trSuccessWave({
                     title: "Fullscreen preview",
                     subtitle: "Testing live trSuccessWave with current origin & palette.",
@@ -369,6 +373,7 @@
                     type: state.type,
                     speed: state.speed,
                     origin: originVal,
+                    followCursor: isPointer,
                     buttonLabel: "Close preview"
                 });
             }
